@@ -1,5 +1,6 @@
 import pygame
 import sys
+import requests
 pygame.init()
 
 WIDTH = 750
@@ -9,40 +10,13 @@ smaller_font = pygame.font.SysFont(None,50)
 pos = None
 number_entered = False
 flag_submit = False
-grid = [
-        [0,9,0,0,0,2,7,0,5],
-        [0,0,7,9,0,8,0,1,6],
-        [6,0,0,3,7,0,0,9,4],
-        [0,7,0,0,0,9,0,3,0],
-        [8,2,0,0,0,6,4,0,0],
-        [4,0,5,8,1,7,6,2,0],
-        [0,0,0,0,2,3,8,0,0],
-        [0,1,0,6,0,0,0,0,0],
-        [0,0,0,7,9,4,1,0,3],
-    ]
-grid_original = [
-        [0,9,0,0,0,2,7,0,5],
-        [0,0,7,9,0,8,0,1,6],
-        [6,0,0,3,7,0,0,9,4],
-        [0,7,0,0,0,9,0,3,0],
-        [8,2,0,0,0,6,4,0,0],
-        [4,0,5,8,1,7,6,2,0],
-        [0,0,0,0,2,3,8,0,0],
-        [0,1,0,6,0,0,0,0,0],
-        [0,0,0,7,9,4,1,0,3],
-    ]
-answer = [
-    [3,9,1,4,6,2,7,8,5],
-    [2,4,7,9,5,8,3,1,6],
-    [6,5,8,3,7,1,2,9,4],
-    [1,7,6,2,4,9,5,3,8],
-    [8,2,9,5,3,6,4,7,1],
-    [4,3,5,8,1,7,6,2,9],
-    [9,6,4,1,2,3,8,5,7],
-    [7,1,3,6,8,5,9,4,2],
-    [5,8,2,7,9,4,1,6,3],
-]
 
+response = requests.get('https://sudoku-api.vercel.app/api/dosuku')
+response = response.json()
+# print(response)
+grid = response['newboard']['grids'][0]['value']
+answer = response['newboard']['grids'][0]['solution']
+grid_original = [i.copy() for i in grid]
 
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Tic Tac Toe')
@@ -54,19 +28,26 @@ def draw_background():
       pygame.draw.rect(win,pygame.Color('yellow'),pygame.Rect(15,15,720,100))
       text = font.render('Its Correct',True,pygame.Color('black'))
       win.blit(text,(235,40))
+      newText = smaller_font.render('New',True,pygame.Color('black'))
+      gameText = smaller_font.render('Game',True,pygame.Color('black'))
       tryText = smaller_font.render('Try',True,pygame.Color('black'))
       againText = smaller_font.render('Again',True,pygame.Color('black'))
-      win.blit(tryText,(645,35))
-      win.blit(againText,(630,65))
+      win.blit(tryText,(25,35))
+      win.blit(againText,(25,65))
+      win.blit(newText,(645,35))
+      win.blit(gameText,(630,65))
     else:
-      # print('else')
       pygame.draw.rect(win,pygame.Color('yellow'),pygame.Rect(15,15,720,100))
+      newText = smaller_font.render('New',True,pygame.Color('black'))
+      gameText = smaller_font.render('Game',True,pygame.Color('black'))
+      text = font.render('Incorrect',True,pygame.Color('black'))
       tryText = smaller_font.render('Try',True,pygame.Color('black'))
       againText = smaller_font.render('Again',True,pygame.Color('black'))
-      text = font.render('Incorrect',True,pygame.Color('black'))
+      win.blit(tryText,(25,35))
+      win.blit(againText,(25,65))
       win.blit(text,(235,40))
-      win.blit(tryText,(645,35))
-      win.blit(againText,(630,65))
+      win.blit(newText,(645,35))
+      win.blit(gameText,(630,65))
   else:
     win.fill(pygame.Color('white'))
     pygame.draw.rect(win,pygame.Color('black'),pygame.Rect(15,15,720,720),10)
@@ -115,44 +96,34 @@ def insert(pos,key):
           grid[pos[1]][pos[0]] = key
 
 
-
-
 def game_loop():
-  global pos,flag_submit,grid
+  global pos,flag_submit,grid,grid_original,answer,response
+
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       pygame.quit()
       sys.exit()
     if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
         pos = pygame.mouse.get_pos()
-        if pos[0]>=625 and pos[0]<=730 and pos[1]>=32 and pos[1]<=94:
+        # print(pos)
+        if pos[0]>=20 and pos[0]<=125 and pos[1]>=15 and pos[1]<=105 and flag_submit:
           flag_submit = False
-          grid = [
-                  [0,9,0,0,0,2,7,0,5],
-                  [0,0,7,9,0,8,0,1,6],
-                  [6,0,0,3,7,0,0,9,4],
-                  [0,7,0,0,0,9,0,3,0],
-                  [8,2,0,0,0,6,4,0,0],
-                  [4,0,5,8,1,7,6,2,0],
-                  [0,0,0,0,2,3,8,0,0],
-                  [0,1,0,6,0,0,0,0,0],
-                  [0,0,0,7,9,4,1,0,3],
-              ]
+          grid = [i.copy() for i in grid_original]
+        if pos[0]>=625 and pos[0]<=730 and pos[1]>=32 and pos[1]<=94 and flag_submit:
+          flag_submit = False
+          response = requests.get('https://sudoku-api.vercel.app/api/dosuku')
+          response = response.json()
+          grid = response['newboard']['grids'][0]['value']
+          answer = response['newboard']['grids'][0]['solution']
+          grid_original = [i.copy() for i in grid]
         pos = ((pos[0]-15)//80,(pos[1]-15)//80)
         if (pos[0]>=3 and pos[0]<=5) and pos[1]==9:
           flag_submit = True
-        print(pos)
         
     if event.type == pygame.KEYDOWN and not number_entered:
       insert(pos,event.key-48)
-            # insert()
   draw_background()
   draw_numbers()
-  # if grid == answer:
-  #   pygame.draw.rect(win,pygame.Color('black'),pygame.Rect(15,15,100,100))
-  # else:
-  #   pygame.draw.rect(win,pygame.Color('black'),pygame.Rect(15,15,720,100))
-     
   pygame.display.update()
   
 while True:
