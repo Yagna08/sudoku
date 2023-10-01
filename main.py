@@ -13,7 +13,6 @@ flag_submit = False
 
 response = requests.get('https://sudoku-api.vercel.app/api/dosuku')
 response = response.json()
-# print(response)
 grid = response['newboard']['grids'][0]['value']
 answer = response['newboard']['grids'][0]['solution']
 grid_original = [i.copy() for i in grid]
