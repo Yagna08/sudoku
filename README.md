@@ -8,7 +8,5 @@ It provides a graphical interface for interacting with the game board and solvin
 - Generate new Sudoku puzzles on every run.
 - User-friendly graphical interface using Pygame.
 - Interactive gameplay that allows users to fill in cells.
-- Validation of user-inputted numbers to ensure they adhere to Sudoku rules.
-- Option to reveal the solution or reset the game board.
 
 This Sudoku game was created by Yagna. It is based on the Pygame library and utilizes open-source resources for Sudoku puzzle generation and validation.
